@@ -343,12 +343,56 @@ camera.position.set(0, 0.3, 9);
 // ── Lights ────────────────────────────────────────────────
 scene.add(new THREE.AmbientLight(0xffffff, 0.08));
 
-const sunLight = new THREE.DirectionalLight(0xffffff, 0.5);
+const sunLight = new THREE.DirectionalLight(0xfff5d0, 1.1);
 sunLight.position.set(4, 8, 5);
 scene.add(sunLight);
 
+// ── Sun visual ────────────────────────────────────────────
+const sunSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(0.55, 32, 32),
+  new THREE.ShaderMaterial({
+    fog: false,
+    vertexShader: `
+      varying vec3 vNormal;
+      varying vec3 vViewDir;
+      void main() {
+        vNormal  = normalize(normalMatrix * normal);
+        vec4 mv  = modelViewMatrix * vec4(position, 1.0);
+        vViewDir = normalize(-mv.xyz);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vNormal;
+      varying vec3 vViewDir;
+      void main() {
+        float d   = clamp(dot(vNormal, vViewDir), 0.0, 1.0);
+        vec3 core = vec3(1.00, 0.98, 0.88); // bright white-yellow centre
+        vec3 mid  = vec3(1.00, 0.70, 0.08); // orange-yellow
+        vec3 limb = vec3(0.82, 0.16, 0.02); // deep red at edge
+        vec3 col  = d > 0.5
+          ? mix(mid,  core, (d - 0.5) * 2.0)
+          : mix(limb, mid,  d * 2.0);
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+  })
+);
+scene.add(sunSphere);
+// Halo layers — colour shifts from yellow-orange outward to deep red
+[
+  { r: 1.8, color: 0xffcc33, op: 0.09 },
+  { r: 2.8, color: 0xff7700, op: 0.05 },
+  { r: 4.5, color: 0xff2200, op: 0.02 },
+].forEach(({ r, color, op }) => {
+  sunSphere.add(new THREE.Mesh(
+    new THREE.SphereGeometry(r, 12, 12),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: op, fog: false })
+  ));
+});
+
 // Per-section accent lights — positioned later
-const ACCENT_COLORS = [0x4d88ff, 0xffffff, 0x44ffb0];
+const ACCENT_COLORS = [0xff99aa, 0xaaccff, 0x2db87a];
 const accentLights  = ACCENT_COLORS.map(c => {
   const l = new THREE.PointLight(c, 0.5, 10);
   scene.add(l);
@@ -364,26 +408,26 @@ scene.add(gridHelper);
 const SECTIONS = [
   {
     label:    'SKILLS',
-    geo:      new THREE.IcosahedronGeometry(0.92, 0),
-    pos:      [-3.4, 0, 0],
-    rSpeed:   [0.004, 0.006],
-    ringCol:  0x4d88ff,
+    geo:      new THREE.IcosahedronGeometry(0.92, 2),
+    pos:      [-4.0, 0, 0],
+    rSpeed:   [0.002, 0.003],
+    ringCol:  0xff99aa,
     panel:    buildSkills,
   },
   {
     label:    'PROJECTS',
-    geo:      new THREE.OctahedronGeometry(0.92, 0),
+    geo:      new THREE.OctahedronGeometry(0.92, 2),
     pos:      [0, 0, 0],
-    rSpeed:   [0.005, 0.004],
-    ringCol:  0xffffff,
+    rSpeed:   [0.0025, 0.002],
+    ringCol:  0xaaccff,
     panel:    buildProjects,
   },
   {
     label:    'CONTACT',
     geo:      new THREE.TorusGeometry(0.62, 0.21, 7, 14),
-    pos:      [3.4, 0, 0],
-    rSpeed:   [0.003, 0.007],
-    ringCol:  0x44ffb0,
+    pos:      [4.0, 0, 0],
+    rSpeed:   [0.0015, 0.0035],
+    ringCol:  0x2db87a,
     panel:    buildContact,
   },
 ];
@@ -391,7 +435,7 @@ const SECTIONS = [
 // ── Main meshes ───────────────────────────────────────────
 const meshes = SECTIONS.map((s, i) => {
   const mat  = new THREE.MeshStandardMaterial({
-    color:       0xffffff,
+    color:       s.ringCol,
     wireframe:   true,
     transparent: true,
     opacity:     0,
@@ -404,7 +448,7 @@ const meshes = SECTIONS.map((s, i) => {
 
   // Glow layer — slightly larger copy to simulate line thickness
   const glowMat = new THREE.MeshStandardMaterial({
-    color: 0xffffff, wireframe: true, transparent: true, opacity: 0,
+    color: s.ringCol, wireframe: true, transparent: true, opacity: 0,
   });
   const glow = new THREE.Mesh(s.geo, glowMat);
   glow.scale.setScalar(1.045);
@@ -414,6 +458,22 @@ const meshes = SECTIONS.map((s, i) => {
   // place accent light at this node
   accentLights[i].position.set(...s.pos);
 
+  return mesh;
+});
+
+// ── Inner detail shapes (Skills & Projects only) ──────────
+const innerShapes = [
+  new THREE.IcosahedronGeometry(0.48, 0),
+  new THREE.OctahedronGeometry(0.48, 0),
+].map((geo, i) => {
+  const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+    color:       SECTIONS[i].ringCol,
+    wireframe:   true,
+    transparent: true,
+    opacity:     0.18,
+  }));
+  mesh.position.set(...SECTIONS[i].pos);
+  scene.add(mesh);
   return mesh;
 });
 
@@ -640,6 +700,15 @@ function tick() {
   requestAnimationFrame(tick);
   t += 0.008;
 
+  // Orbit sun
+  const sa = t * 0.09;
+  sunSphere.position.set(
+    Math.cos(sa) * 42,
+    18 + Math.sin(t * 0.06) * 7,
+    Math.sin(sa) * 42
+  );
+  sunLight.position.copy(sunSphere.position);
+
   // Twinkle stars
   starMats.forEach(s => {
     s.mat.opacity = s.baseOp + Math.sin(t * s.speed + s.phase) * 0.13;
@@ -667,6 +736,12 @@ function tick() {
     s.rings[1].rotation.x += 0.004;
   });
 
+  // Counter-rotate inner shapes
+  innerShapes[0].rotation.x -= 0.003;
+  innerShapes[0].rotation.y -= 0.005;
+  innerShapes[1].rotation.x -= 0.004;
+  innerShapes[1].rotation.y -= 0.003;
+
   // Animate satellites
   satellites.forEach(sat => {
     const u = sat.userData;
@@ -677,9 +752,12 @@ function tick() {
     sat.rotation.y += 0.02;
   });
 
-  // Raycasting
+  // Raycasting — explicit false prevents recursive child hits
   raycaster.setFromCamera(mouse, camera);
-  const hits = raycaster.intersectObjects(meshes);
+  const hits = raycaster.intersectObjects(meshes, false);
+
+  // Reset inner shapes
+  innerShapes.forEach(s => { s.material.opacity = 0.18; });
 
   // Reset states
   meshes.forEach((m, i) => {
@@ -695,15 +773,19 @@ function tick() {
 
   hoveredMesh = null;
   if (!panelOpen && hits.length) {
-    hoveredMesh = hits[0].object;
-    const idx   = hoveredMesh.userData.idx;
-    hoveredMesh.material.opacity         = 0.97;
-    hoveredMesh.userData.glowMat.opacity = 0.55;
-    scaleV.setScalar(1.11);
-    hoveredMesh.scale.lerp(scaleV, 0.1);
-    labelEls[idx].classList.add('active');
-    SECTIONS[idx].rings.forEach(r => { r.material.opacity = 0.28; });
-    accentLights[idx].intensity = 1.6;
+    const hit = hits[0].object;
+    if (hit.userData.idx != null) {
+      hoveredMesh = hit;
+      const idx   = hoveredMesh.userData.idx;
+      hoveredMesh.material.opacity         = 0.97;
+      hoveredMesh.userData.glowMat.opacity = 0.55;
+      scaleV.setScalar(1.11);
+      hoveredMesh.scale.lerp(scaleV, 0.1);
+      labelEls[idx].classList.add('active');
+      SECTIONS[idx].rings.forEach(r => { r.material.opacity = 0.28; });
+      accentLights[idx].intensity = 1.6;
+      if (idx < 2) innerShapes[idx].material.opacity = 0.82;
+    }
   }
 
   renderer.domElement.style.cursor = hoveredMesh ? 'pointer' : 'default';
