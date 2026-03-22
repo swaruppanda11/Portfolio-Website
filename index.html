@@ -288,11 +288,171 @@
     .contact-val { color: #999; font-size: 0.86rem; }
     .contact-val a { color: #999; text-decoration: none; transition: color 0.2s; }
     .contact-val a:hover { color: #fff; }
+
+    /* ── About Sidebar ───────────────────────────────────── */
+    #about-sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 248px;
+      background: rgba(2,2,2,0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-right: 1px solid #141414;
+      z-index: 20;
+      transform: translateX(-248px);
+      transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+      pointer-events: all;
+      display: flex;
+      flex-direction: column;
+      padding: 52px 28px 36px;
+      gap: 0;
+    }
+    #about-sidebar.open { transform: translateX(0); }
+
+    /* Accent lines top & bottom */
+    #about-sidebar::before, #about-sidebar::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #222, transparent);
+    }
+    #about-sidebar::before { top: 0; }
+    #about-sidebar::after  { bottom: 0; }
+
+    /* Pull tab */
+    #about-tab {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      z-index: 21;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: 0.58rem;
+      letter-spacing: 0.3em;
+      color: #444;
+      padding: 14px 7px;
+      border: 1px solid #161616;
+      border-left: none;
+      background: rgba(2,2,2,0.88);
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s, left 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+    #about-tab.open { left: 248px; color: #666; }
+    #about-tab:hover { color: #aaa; }
+
+    /* Corner ticks on sidebar */
+    .sb-tick {
+      position: absolute;
+      width: 7px; height: 7px;
+    }
+    .sb-tick-tl { top: 18px; left: 18px;
+      border-top: 1px solid #2a2a2a; border-left: 1px solid #2a2a2a; }
+    .sb-tick-br { bottom: 18px; right: 18px;
+      border-bottom: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
+
+    /* Sidebar content */
+    .sb-label {
+      font-size: 0.56rem;
+      letter-spacing: 0.35em;
+      color: #333;
+      margin-bottom: 8px;
+      margin-top: 28px;
+    }
+    .sb-label:first-of-type { margin-top: 0; }
+    .sb-value {
+      font-size: 0.76rem;
+      letter-spacing: 0.06em;
+      color: #888;
+      line-height: 1.9;
+    }
+    .sb-value.bright { color: #bbb; }
+    .sb-value.dim    { color: #444; font-size: 0.68rem; }
+    .sb-divider {
+      height: 1px;
+      background: #111;
+      margin: 22px 0;
+    }
+    .sb-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      color: #3a7a4a;
+    }
+    .sb-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #3d8f52;
+      animation: pulse-dot 2.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; box-shadow: 0 0 4px #3d8f52; }
+      50%      { opacity: 0.4; box-shadow: none; }
+    }
+    .sb-bio {
+      margin-top: 24px;
+      font-size: 0.68rem;
+      line-height: 2;
+      color: #383838;
+      letter-spacing: 0.04em;
+    }
+    .sb-footer {
+      margin-top: auto;
+      font-size: 0.54rem;
+      letter-spacing: 0.25em;
+      color: #222;
+    }
   </style>
 </head>
 <body>
 
 <div id="frame"></div>
+
+<!-- About sidebar -->
+<div id="about-tab">ABOUT</div>
+<div id="about-sidebar">
+  <div class="sb-tick sb-tick-tl"></div>
+  <div class="sb-tick sb-tick-br"></div>
+
+  <div class="sb-label">ENTITY</div>
+  <div class="sb-value bright">SWARUP PANDA</div>
+  <div class="sb-value dim">SOFTWARE ENGINEER</div>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-label">CURRENT MISSION</div>
+  <div class="sb-value bright">M.S. Computer Science</div>
+  <div class="sb-value">Univ. of Colorado Boulder</div>
+  <div class="sb-value dim">2025 — 2027</div>
+
+  <div class="sb-label">PRIOR MISSION</div>
+  <div class="sb-value">B.Tech · CS &amp; AI/ML</div>
+  <div class="sb-value dim">SRM IST · GPA 8.31 · 2020–2024</div>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-label">COORDINATES</div>
+  <div class="sb-value">Boulder, CO · USA</div>
+
+  <div class="sb-label">SPECIALISATION</div>
+  <div class="sb-value">Cloud · DevOps · AI</div>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-label">STATUS</div>
+  <div class="sb-status"><span class="sb-dot"></span>OPEN TO OPPORTUNITIES</div>
+
+  <div class="sb-bio">
+    Systems-minded engineer passionate about cloud-native infrastructure, distributed systems, and the intersection of DevOps and AI.
+  </div>
+
+  <div class="sb-footer">// SYS.PROFILE · v1.0</div>
+</div>
 
 <div class="hud" id="hud-tl">SYS // ONLINE<br>3 NODES ACTIVE</div>
 <div class="hud" id="hud-tr">PORTFOLIO // v1.0<br>2026</div>
@@ -683,6 +843,36 @@ for (let n = 0; n < 5; n++) {
   });
 }
 
+// ── ISS ───────────────────────────────────────────────────
+const issGroup = new THREE.Group();
+const issMat   = new THREE.MeshBasicMaterial({ color: 0xd8d8d8 });
+const panelMat = new THREE.MeshBasicMaterial({ color: 0x4a6680 });
+
+// Main truss beam
+issGroup.add(new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.046, 0.046), issMat));
+
+// 4 pairs of solar panels
+[-1.25, -0.42, 0.42, 1.25].forEach(px => {
+  [0.30, -0.30].forEach(py => {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.40, 0.011), panelMat);
+    p.position.set(px, py, 0);
+    issGroup.add(p);
+  });
+});
+
+// Central habitat module (horizontal)
+const hab = new THREE.Mesh(new THREE.CylinderGeometry(0.078, 0.078, 0.52, 8), issMat);
+hab.rotation.z = Math.PI / 2;
+issGroup.add(hab);
+
+// Perpendicular connecting module
+issGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.34, 8), issMat));
+
+scene.add(issGroup);
+let issAngle    = Math.random() * Math.PI * 2;
+const ISS_R     = 80;
+const ISS_INC   = 51.6 * Math.PI / 180;   // real ISS orbital inclination
+
 // — Milky Way band (faint dense strip of stars) —
 {
   const count = 800;
@@ -939,6 +1129,20 @@ function tick() {
   innerShapes[1].rotation.x -= 0.004;
   innerShapes[1].rotation.y -= 0.003;
 
+  // ISS orbit
+  issAngle += 0.0018;
+  issGroup.position.set(
+    ISS_R * Math.cos(issAngle),
+    ISS_R * Math.sin(issAngle) * Math.sin(ISS_INC),
+   -ISS_R * Math.sin(issAngle) * Math.cos(ISS_INC)
+  );
+  const nextA = issAngle + 0.02;
+  issGroup.lookAt(
+    ISS_R * Math.cos(nextA),
+    ISS_R * Math.sin(nextA) * Math.sin(ISS_INC),
+   -ISS_R * Math.sin(nextA) * Math.cos(ISS_INC)
+  );
+
   // Animate satellites
   satellites.forEach(sat => {
     const u = sat.userData;
@@ -1018,6 +1222,14 @@ function tick() {
 tick();
 
 // ── Resize ────────────────────────────────────────────────
+// ── About sidebar toggle ───────────────────────────────────
+const aboutTab     = document.getElementById('about-tab');
+const aboutSidebar = document.getElementById('about-sidebar');
+aboutTab.addEventListener('click', () => {
+  const open = aboutSidebar.classList.toggle('open');
+  aboutTab.classList.toggle('open', open);
+});
+
 window.addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
