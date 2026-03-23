@@ -956,35 +956,7 @@ function spawnComet(c) {
   c.active   = true;
 }
 
-// ── ISS ───────────────────────────────────────────────────
-const issGroup = new THREE.Group();
-const issMat   = new THREE.MeshBasicMaterial({ color: 0xd8d8d8 });
-const panelMat = new THREE.MeshBasicMaterial({ color: 0x4a6680 });
 
-// Main truss beam
-issGroup.add(new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.046, 0.046), issMat));
-
-// 4 pairs of solar panels
-[-1.25, -0.42, 0.42, 1.25].forEach(px => {
-  [0.30, -0.30].forEach(py => {
-    const p = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.40, 0.011), panelMat);
-    p.position.set(px, py, 0);
-    issGroup.add(p);
-  });
-});
-
-// Central habitat module (horizontal)
-const hab = new THREE.Mesh(new THREE.CylinderGeometry(0.078, 0.078, 0.52, 8), issMat);
-hab.rotation.z = Math.PI / 2;
-issGroup.add(hab);
-
-// Perpendicular connecting module
-issGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.34, 8), issMat));
-
-scene.add(issGroup);
-let issAngle    = Math.random() * Math.PI * 2;
-const ISS_R     = 80;
-const ISS_INC   = 51.6 * Math.PI / 180;   // real ISS orbital inclination
 
 // — Milky Way band (faint dense strip of stars) —
 {
@@ -1337,19 +1309,6 @@ function tick() {
     }
   });
 
-  // ISS orbit
-  issAngle += 0.0018;
-  issGroup.position.set(
-    ISS_R * Math.cos(issAngle),
-    ISS_R * Math.sin(issAngle) * Math.sin(ISS_INC),
-   -ISS_R * Math.sin(issAngle) * Math.cos(ISS_INC)
-  );
-  const nextA = issAngle + 0.02;
-  issGroup.lookAt(
-    ISS_R * Math.cos(nextA),
-    ISS_R * Math.sin(nextA) * Math.sin(ISS_INC),
-   -ISS_R * Math.sin(nextA) * Math.cos(ISS_INC)
-  );
 
   // Animate satellites
   satellites.forEach(sat => {
