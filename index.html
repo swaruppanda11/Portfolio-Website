@@ -122,6 +122,10 @@
       animation: blink 3.5s ease-in-out infinite;
     }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    @keyframes trailFade {
+      0%   { opacity: 0.8; transform: translate(-50%,-50%) scale(1);   }
+      100% { opacity: 0;   transform: translate(-50%,-50%) scale(0.15); }
+    }
 
     /* Labels */
     #labels {
@@ -132,7 +136,7 @@
     }
     .obj-label {
       position: absolute;
-      font-size: 0.65rem;
+      font-size: 0.82rem;
       letter-spacing: 0.3em;
       color: #555;
       transform: translate(-50%, 0);
@@ -289,7 +293,29 @@
     .contact-val a { color: #999; text-decoration: none; transition: color 0.2s; }
     .contact-val a:hover { color: #fff; }
 
-    /* ── About Sidebar ───────────────────────────────────── */
+    /* Pull tab */
+    #about-tab {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      z-index: 21;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: 0.72rem;
+      letter-spacing: 0.3em;
+      color: #444;
+      padding: 14px 7px;
+      border: 1px solid #161616;
+      border-left: none;
+      background: rgba(2,2,2,0.88);
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s, left 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+    #about-tab.open { color: #888; }
+    #about-tab:hover { color: #aaa; }
+
     #about-sidebar {
       position: fixed;
       top: 0; left: 0; bottom: 0;
@@ -308,8 +334,6 @@
       gap: 0;
     }
     #about-sidebar.open { transform: translateX(0); }
-
-    /* Accent lines top & bottom */
     #about-sidebar::before, #about-sidebar::after {
       content: '';
       position: absolute;
@@ -319,94 +343,21 @@
     }
     #about-sidebar::before { top: 0; }
     #about-sidebar::after  { bottom: 0; }
-
-    /* Pull tab */
-    #about-tab {
-      position: fixed;
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-      z-index: 21;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-      font-size: 0.58rem;
-      letter-spacing: 0.3em;
-      color: #444;
-      padding: 14px 7px;
-      border: 1px solid #161616;
-      border-left: none;
-      background: rgba(2,2,2,0.88);
-      cursor: pointer;
-      user-select: none;
-      transition: color 0.2s, left 0.45s cubic-bezier(0.4,0,0.2,1);
-    }
     #about-tab.open { left: 248px; color: #666; }
-    #about-tab:hover { color: #aaa; }
-
-    /* Corner ticks on sidebar */
-    .sb-tick {
-      position: absolute;
-      width: 7px; height: 7px;
-    }
-    .sb-tick-tl { top: 18px; left: 18px;
-      border-top: 1px solid #2a2a2a; border-left: 1px solid #2a2a2a; }
-    .sb-tick-br { bottom: 18px; right: 18px;
-      border-bottom: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
-
-    /* Sidebar content */
-    .sb-label {
-      font-size: 0.56rem;
-      letter-spacing: 0.35em;
-      color: #333;
-      margin-bottom: 8px;
-      margin-top: 28px;
-    }
+    .sb-tick { position: absolute; width: 7px; height: 7px; }
+    .sb-tick-tl { top: 18px; left: 18px; border-top: 1px solid #2a2a2a; border-left: 1px solid #2a2a2a; }
+    .sb-tick-br { bottom: 18px; right: 18px; border-bottom: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
+    .sb-label { font-size: 0.56rem; letter-spacing: 0.35em; color: #333; margin-bottom: 8px; margin-top: 28px; }
     .sb-label:first-of-type { margin-top: 0; }
-    .sb-value {
-      font-size: 0.76rem;
-      letter-spacing: 0.06em;
-      color: #888;
-      line-height: 1.9;
-    }
+    .sb-value { font-size: 0.76rem; letter-spacing: 0.06em; color: #888; line-height: 1.9; }
     .sb-value.bright { color: #bbb; }
     .sb-value.dim    { color: #444; font-size: 0.68rem; }
-    .sb-divider {
-      height: 1px;
-      background: #111;
-      margin: 22px 0;
-    }
-    .sb-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.62rem;
-      letter-spacing: 0.18em;
-      color: #3a7a4a;
-    }
-    .sb-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: #3d8f52;
-      animation: pulse-dot 2.5s ease-in-out infinite;
-      flex-shrink: 0;
-    }
-    @keyframes pulse-dot {
-      0%,100% { opacity: 1; box-shadow: 0 0 4px #3d8f52; }
-      50%      { opacity: 0.4; box-shadow: none; }
-    }
-    .sb-bio {
-      margin-top: 24px;
-      font-size: 0.68rem;
-      line-height: 2;
-      color: #383838;
-      letter-spacing: 0.04em;
-    }
-    .sb-footer {
-      margin-top: auto;
-      font-size: 0.54rem;
-      letter-spacing: 0.25em;
-      color: #222;
-    }
+    .sb-divider { height: 1px; background: #111; margin: 22px 0; }
+    .sb-status { display: flex; align-items: center; gap: 8px; font-size: 0.62rem; letter-spacing: 0.18em; color: #3a7a4a; }
+    .sb-dot { width: 5px; height: 5px; border-radius: 50%; background: #3d8f52; animation: pulse-dot 2.5s ease-in-out infinite; flex-shrink: 0; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;box-shadow:0 0 4px #3d8f52} 50%{opacity:0.4;box-shadow:none} }
+    .sb-bio { margin-top: 24px; font-size: 0.68rem; line-height: 2; color: #383838; letter-spacing: 0.04em; }
+    .sb-footer { margin-top: auto; font-size: 0.54rem; letter-spacing: 0.25em; color: #222; }
   </style>
 </head>
 <body>
@@ -440,7 +391,7 @@
   <div class="sb-value">Boulder, CO · USA</div>
 
   <div class="sb-label">SPECIALISATION</div>
-  <div class="sb-value">Cloud · DevOps · AI</div>
+  <div class="sb-value">Cloud · DevOps · Agentic AI</div>
 
   <div class="sb-divider"></div>
 
@@ -461,7 +412,7 @@
 
 <div id="hero">
   <h1>SWARUP PANDA</h1>
-  <p>DEVOPS &nbsp;·&nbsp; CLOUD &nbsp;·&nbsp; FULL STACK</p>
+  <p>DEVOPS &nbsp;·&nbsp; CLOUD &nbsp;·&nbsp; AGENTIC AI</p>
 </div>
 
 <div id="hint">HOVER &amp; CLICK TO EXPLORE</div>
@@ -658,6 +609,7 @@ SECTIONS.forEach(s => {
   ];
 });
 
+
 // ── Mini satellites ───────────────────────────────────────
 const satellites = [];
 SECTIONS.forEach(s => {
@@ -710,34 +662,57 @@ scene.add(new THREE.Points(pGeo,
 ));
 
 // ── Stars (background, fog-independent) ───────────────────
+// Parallax factors: layer 0 = far/small, layer 2 = close/bright
+const starParallax = [0.18, 0.42, 0.72];
 const starLayers = [
   { count: 2500, size: 1.4, baseOp: 0.72, speed: 0.35, phase: 0.00 },
   { count: 1200, size: 0.9, baseOp: 0.50, speed: 0.65, phase: 2.09 },
   { count:  600, size: 1.8, baseOp: 0.82, speed: 0.22, phase: 4.19 },
 ];
-const starMats = starLayers.map(sl => {
-  const arr = new Float32Array(sl.count * 3);
+
+// Star spectral colour palette (weighted toward white)
+function starColor() {
+  const r = Math.random();
+  if (r < 0.55) return [1.00, 1.00, 1.00];               // white
+  if (r < 0.70) return [0.72, 0.82, 1.00];               // blue-white (O/B)
+  if (r < 0.82) return [1.00, 0.95, 0.78];               // warm yellow (G)
+  if (r < 0.92) return [1.00, 0.80, 0.45];               // orange (K)
+  return              [1.00, 0.55, 0.35];                 // red (M)
+}
+
+const starMats   = [];
+const starPoints = [];   // stored for parallax animation
+
+starLayers.forEach((sl, li) => {
+  const pos = new Float32Array(sl.count * 3);
+  const col = new Float32Array(sl.count * 3);
   for (let i = 0; i < sl.count; i++) {
-    const theta        = Math.random() * Math.PI * 2;
-    const phi          = Math.acos(2 * Math.random() - 1);
-    const r            = 110 + Math.random() * 60;
-    arr[i * 3]         = r * Math.sin(phi) * Math.cos(theta);
-    arr[i * 3 + 1]     = r * Math.sin(phi) * Math.sin(theta);
-    arr[i * 3 + 2]     = r * Math.cos(phi);
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(2 * Math.random() - 1);
+    const r     = 110 + Math.random() * 60;
+    pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    pos[i*3+2] = r * Math.cos(phi);
+    const [cr, cg, cb] = starColor();
+    col[i*3] = cr; col[i*3+1] = cg; col[i*3+2] = cb;
   }
   const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
   const mat = new THREE.PointsMaterial({
-    color:           0xffffff,
+    vertexColors:    true,
     size:            sl.size,
     sizeAttenuation: false,
     transparent:     true,
     opacity:         sl.baseOp,
     fog:             false,
   });
-  scene.add(new THREE.Points(geo, mat));
-  return { mat, baseOp: sl.baseOp, speed: sl.speed, phase: sl.phase };
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+  starPoints.push(pts);
+  starMats.push({ mat, baseOp: sl.baseOp, speed: sl.speed, phase: sl.phase });
 });
+
 
 // ── Space features ────────────────────────────────────────
 // Helper: random point on the background sphere
@@ -841,6 +816,144 @@ for (let n = 0; n < 5; n++) {
       transparent: true, opacity: op, fog: false,
     })));
   });
+}
+
+// ── Supernovas ────────────────────────────────────────────
+const supernovas = Array.from({ length: 6 }, (_, i) => {
+  const group = new THREE.Group();
+
+  // Central flash
+  const core = new THREE.Mesh(
+    new THREE.SphereGeometry(0.38, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xddeeff, transparent: true, opacity: 0, fog: false })
+  );
+  group.add(core);
+
+  // Expanding shell ring 1 (warm yellow)
+  const ring1 = new THREE.Mesh(
+    new THREE.TorusGeometry(1, 0.045, 6, 40),
+    new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0, fog: false })
+  );
+  group.add(ring1);
+
+  // Expanding shell ring 2 (blue-purple, tilted plane)
+  const ring2 = new THREE.Mesh(
+    new THREE.TorusGeometry(1, 0.028, 6, 40),
+    new THREE.MeshBasicMaterial({ color: 0x8855ff, transparent: true, opacity: 0, fog: false })
+  );
+  ring2.rotation.x = Math.PI / 3;
+  group.add(ring2);
+
+  // Ejected particle cloud
+  const pCount = 55;
+  const pArr   = new Float32Array(pCount * 3);
+  const pDirs  = Array.from({ length: pCount }, () => {
+    const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+    return new THREE.Vector3(Math.sin(ph)*Math.cos(th), Math.sin(ph)*Math.sin(th), Math.cos(ph));
+  });
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pArr, 3));
+  const pMat = new THREE.PointsMaterial({
+    color: 0xff7733, size: 2.2, sizeAttenuation: false,
+    transparent: true, opacity: 0, fog: false,
+  });
+  group.add(new THREE.Points(pGeo, pMat));
+  scene.add(group);
+
+  return {
+    group, core, ring1, ring2, pGeo, pDirs, pMat,
+    active: false, progress: 0,
+    timer: i * 4,   // stagger initial triggers evenly (~8s apart)
+  };
+});
+
+function spawnSupernova(sn) {
+  const th = Math.random() * Math.PI * 2;
+  const ph = 0.18 + Math.random() * 0.52;
+  const r  = 98 + Math.random() * 28;
+  sn.group.position.set(
+    r * Math.sin(ph) * Math.cos(th),
+    r * Math.sin(ph) * Math.sin(th),
+    -r * Math.cos(ph)
+  );
+  // Reset particle positions to centre
+  sn.pGeo.attributes.position.array.fill(0);
+  sn.pGeo.attributes.position.needsUpdate = true;
+  sn.progress = 0;
+  sn.active   = true;
+}
+
+// ── Comets ────────────────────────────────────────────────
+const COMET_COUNT  = 3;
+const TAIL_POINTS  = 60;
+const _cometHead   = new THREE.Vector3();
+const _cometNext   = new THREE.Vector3();
+
+const comets = Array.from({ length: COMET_COUNT }, (_, i) => {
+  // Nucleus — small bright sphere
+  const nucleus = new THREE.Mesh(
+    new THREE.SphereGeometry(0.18, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xeef8ff, fog: false })
+  );
+  // Inner coma glow
+  const coma = new THREE.Mesh(
+    new THREE.SphereGeometry(0.55, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.22, fog: false })
+  );
+  nucleus.add(coma);
+
+  // Tail — line strip that stretches behind the nucleus
+  const tailPos = new Float32Array(TAIL_POINTS * 3);
+  const tailCol = new Float32Array(TAIL_POINTS * 3);
+  for (let j = 0; j < TAIL_POINTS; j++) {
+    const f = j / (TAIL_POINTS - 1);           // 0 = head, 1 = tip
+    tailCol[j*3]   = 0.75 + f * 0.1;           // R — slight warm tint
+    tailCol[j*3+1] = 0.88 + f * 0.05;          // G
+    tailCol[j*3+2] = 1.00;                      // B — icy blue-white
+  }
+  const tailGeo = new THREE.BufferGeometry();
+  tailGeo.setAttribute('position', new THREE.BufferAttribute(tailPos, 3));
+  tailGeo.setAttribute('color',    new THREE.BufferAttribute(tailCol, 3));
+  const tailMat = new THREE.LineBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0.7, fog: false,
+  });
+  const tail = new THREE.Line(tailGeo, tailMat);
+
+  scene.add(nucleus);
+  scene.add(tail);
+
+  // Hide until first spawn
+  nucleus.visible = false;
+  tailMat.opacity = 0;
+
+  return {
+    nucleus, tail, tailGeo, tailMat,
+    active: false,
+    progress: 0,
+    pos: new THREE.Vector3(),
+    dir: new THREE.Vector3(),
+    speed: 0,
+    len: 0,
+    timer: i * 10,
+  };
+});
+
+function spawnComet(c) {
+  // Start on background sphere, travel in a random tangent direction
+  const th = Math.random() * Math.PI * 2;
+  const ph = 0.15 + Math.random() * 0.5;
+  const r  = 115;
+  c.pos.set(r * Math.sin(ph) * Math.cos(th), r * Math.sin(ph) * Math.sin(th), -r * Math.cos(ph));
+  // Tangent direction (perpendicular to radial)
+  const radial  = c.pos.clone().normalize();
+  const up      = Math.abs(radial.y) < 0.9 ? new THREE.Vector3(0,1,0) : new THREE.Vector3(1,0,0);
+  const tangent = new THREE.Vector3().crossVectors(radial, up).normalize();
+  const tilt    = new THREE.Vector3().crossVectors(radial, tangent).normalize();
+  c.dir.copy(tangent).addScaledVector(tilt, (Math.random() - 0.5) * 0.6).normalize();
+  c.speed    = 18 + Math.random() * 14;
+  c.len      = 10 + Math.random() * 8;
+  c.progress = 0;
+  c.active   = true;
 }
 
 // ── ISS ───────────────────────────────────────────────────
@@ -1008,7 +1121,7 @@ function buildContact() {
     ['EMAIL',    '<a href="mailto:swaruppanda@hotmail.com">swaruppanda@hotmail.com</a>'],
     ['PHONE',    '<a href="tel:+17208393046">+1 (720) 839-3046</a>'],
     ['GITHUB',   '<a href="https://github.com/swaruppanda11" target="_blank">github.com/swaruppanda11</a>'],
-    ['LINKEDIN', '<a href="https://linkedin.com/in/swarup-panda" target="_blank">linkedin.com/in/swarup-panda</a>'],
+    ['LINKEDIN', '<a href="https://www.linkedin.com/in/swarup-panda-1a3a4b1a8/" target="_blank">linkedin.com/in/swarup-panda</a>'],
   ];
   return rows.map(([l, v]) => `
     <div class="contact-row">
@@ -1018,25 +1131,36 @@ function buildContact() {
 }
 
 // ── Mouse / Raycaster ─────────────────────────────────────
-const raycaster = new THREE.Raycaster();
-const mouse     = new THREE.Vector2(-9999, -9999);
-let camTargetX  = 0;
-let camTargetY  = 0;
-let hoveredMesh = null;
+const raycaster  = new THREE.Raycaster();
+const _mouse     = new THREE.Vector2();
+let camTargetX   = 0;
+let camTargetY   = 0;
+let hoveredMesh  = null;
+let _lastCursor  = '';   // skip redundant cursor style writes
 
 renderer.domElement.addEventListener('mousemove', e => {
-  mouse.x    =  (e.clientX / innerWidth)  * 2 - 1;
-  mouse.y    = -(e.clientY / innerHeight) * 2 + 1;
+  _mouse.x   =  (e.clientX / innerWidth)  * 2 - 1;
+  _mouse.y   = -(e.clientY / innerHeight) * 2 + 1;
   camTargetX =  (e.clientX / innerWidth  - 0.5) * 2.6;
   camTargetY = -(e.clientY / innerHeight - 0.5) * 1.6;
+  // Raycast here — only runs when mouse moves, not every frame
+  raycaster.setFromCamera(_mouse, camera);
+  const hits = raycaster.intersectObjects(meshes, false);
+  hoveredMesh = (!panelOpen && hits.length && hits[0].object.userData.idx != null)
+    ? hits[0].object : null;
 });
 
 renderer.domElement.addEventListener('click', () => {
-  if (hoveredMesh && !panelOpen) openPanel(hoveredMesh.userData.section);
+  if (hoveredMesh && !panelOpen) {
+    openPanel(hoveredMesh.userData.section);
+  }
 });
 
 // ── Helpers ───────────────────────────────────────────────
-const _sv = new THREE.Vector3();
+const _sv   = new THREE.Vector3();
+const _wpv  = new THREE.Vector3(); // reused for label world-pos
+const _ssH  = new THREE.Vector3(); // shooting-star head
+const _ssT  = new THREE.Vector3(); // shooting-star tail
 function toScreen(pos3d) {
   _sv.copy(pos3d).project(camera);
   return {
@@ -1084,8 +1208,9 @@ function tick() {
       if (ss.timer <= 0) { spawnShootingStar(ss); ss.timer = 10 + Math.random() * 18; }
     } else {
       ss.progress += ss.speed * 0.008;
-      const head = ss.pos.clone().addScaledVector(ss.dir, ss.progress);
-      const tail = ss.pos.clone().addScaledVector(ss.dir, Math.max(0, ss.progress - ss.len));
+      _ssH.copy(ss.pos).addScaledVector(ss.dir, ss.progress);
+      _ssT.copy(ss.pos).addScaledVector(ss.dir, Math.max(0, ss.progress - ss.len));
+      const head = _ssH, tail = _ssT;
       const p = ss.geo.attributes.position.array;
       p[0]=tail.x; p[1]=tail.y; p[2]=tail.z;
       p[3]=head.x; p[4]=head.y; p[5]=head.z;
@@ -1107,6 +1232,12 @@ function tick() {
   camera.position.y += (camTargetY * 0.55 + bobY - camera.position.y) * 0.04;
   camera.lookAt(0, 0, 0);
 
+  // Star parallax — each layer drifts at its own rate with camera
+  starPoints.forEach((pts, i) => {
+    pts.position.x = camera.position.x * starParallax[i];
+    pts.position.y = camera.position.y * starParallax[i];
+  });
+
   // HUD coords
   camXEl.textContent = (camera.position.x >= 0 ? '+' : '') + camera.position.x.toFixed(2);
   camYEl.textContent = (camera.position.y >= 0 ? '+' : '') + camera.position.y.toFixed(2);
@@ -1116,6 +1247,7 @@ function tick() {
     m.rotation.x += SECTIONS[i].rSpeed[0];
     m.rotation.y += SECTIONS[i].rSpeed[1];
   });
+
 
   // Animate rings
   SECTIONS.forEach(s => {
@@ -1128,6 +1260,82 @@ function tick() {
   innerShapes[0].rotation.y -= 0.005;
   innerShapes[1].rotation.x -= 0.004;
   innerShapes[1].rotation.y -= 0.003;
+
+  // Comets
+  comets.forEach(c => {
+    if (!c.active) {
+      c.timer -= 0.008;
+      if (c.timer <= 0) { spawnComet(c); c.timer = 18 + Math.random() * 22; }
+    } else {
+      c.progress += c.speed * 0.008;
+      // Move nucleus
+      _cometHead.copy(c.pos).addScaledVector(c.dir, c.progress);
+      c.nucleus.position.copy(_cometHead);
+      // Build tail — TAIL_POINTS segments fading behind
+      const pa = c.tailGeo.attributes.position.array;
+      for (let j = 0; j < TAIL_POINTS; j++) {
+        const frac = j / (TAIL_POINTS - 1);
+        const dist = c.progress - frac * c.len;
+        if (dist < 0) {
+          pa[j*3] = _cometHead.x; pa[j*3+1] = _cometHead.y; pa[j*3+2] = _cometHead.z;
+        } else {
+          _cometNext.copy(c.pos).addScaledVector(c.dir, dist);
+          pa[j*3] = _cometNext.x; pa[j*3+1] = _cometNext.y; pa[j*3+2] = _cometNext.z;
+        }
+      }
+      c.tailGeo.attributes.position.needsUpdate = true;
+      // Fade in at start, fade out near end
+      const life = c.progress / (c.len + c.speed * 1.4);
+      const fade = Math.sin(Math.min(life, 1) * Math.PI);
+      c.tailMat.opacity          = fade * 0.72;
+      c.nucleus.material.opacity = fade;
+      if (life >= 1) {
+        c.active = false;
+        c.tailMat.opacity = 0;
+        c.nucleus.visible = false;
+      } else {
+        c.nucleus.visible = true;
+      }
+    }
+  });
+
+  // Supernovas
+  supernovas.forEach(sn => {
+    if (!sn.active) {
+      sn.timer -= 0.008;
+      if (sn.timer <= 0) { spawnSupernova(sn); sn.timer = 24; } // 24 ≈ 50 s at 60 fps
+    } else {
+      sn.progress += 0.008 / 4.5;           // ~4.5 s lifetime
+      const p = sn.progress;
+
+      // Core flash: spike then fade
+      sn.core.scale.setScalar(1 + p * 2.2);
+      sn.core.material.opacity = p < 0.08 ? p / 0.08 : Math.max(0, 1 - (p - 0.08) / 0.35);
+
+      // Ring 1 — expands and fades
+      sn.ring1.scale.setScalar(Math.max(0.01, p * 5.5));
+      sn.ring1.material.opacity = Math.max(0, 0.75 - p * 0.85);
+
+      // Ring 2 — expands slower
+      sn.ring2.scale.setScalar(Math.max(0.01, p * 3.8));
+      sn.ring2.material.opacity = Math.max(0, 0.55 - p * 0.65);
+
+      // Particle cloud
+      const pa = sn.pGeo.attributes.position.array;
+      const dist = p * 7;
+      sn.pDirs.forEach((d, j) => {
+        pa[j*3] = d.x*dist; pa[j*3+1] = d.y*dist; pa[j*3+2] = d.z*dist;
+      });
+      sn.pGeo.attributes.position.needsUpdate = true;
+      sn.pMat.opacity = Math.max(0, 0.65 - p * 0.75);
+
+      if (p >= 1) {
+        sn.active = false;
+        sn.core.material.opacity = sn.ring1.material.opacity =
+        sn.ring2.material.opacity = sn.pMat.opacity = 0;
+      }
+    }
+  });
 
   // ISS orbit
   issAngle += 0.0018;
@@ -1156,10 +1364,6 @@ function tick() {
     sat.rotation.y += 0.006;
   });
 
-  // Raycasting — explicit false prevents recursive child hits
-  raycaster.setFromCamera(mouse, camera);
-  const hits = raycaster.intersectObjects(meshes, false);
-
   // Reset inner shapes
   innerShapes.forEach(s => { s.material.opacity = 0.18; });
 
@@ -1175,12 +1379,8 @@ function tick() {
     accentLights[i].intensity = 0.3;
   });
 
-  hoveredMesh = null;
-  if (!panelOpen && hits.length) {
-    const hit = hits[0].object;
-    if (hit.userData.idx != null) {
-      hoveredMesh = hit;
-      const idx   = hoveredMesh.userData.idx;
+  if (hoveredMesh) {
+    const idx = hoveredMesh.userData.idx;
       hoveredMesh.material.opacity         = 0.97;
       hoveredMesh.userData.glowMat.opacity = 0.55;
       scaleV.setScalar(1.11);
@@ -1189,16 +1389,16 @@ function tick() {
       SECTIONS[idx].rings.forEach(r => { r.material.opacity = 0.28; });
       accentLights[idx].intensity = 1.6;
       if (idx < 2) innerShapes[idx].material.opacity = 0.82;
-    }
   }
 
-  renderer.domElement.style.cursor = hoveredMesh ? 'pointer' : 'default';
+  const _cur = hoveredMesh ? 'pointer' : 'default';
+  if (_cur !== _lastCursor) { renderer.domElement.style.cursor = _cur; _lastCursor = _cur; }
 
   // Label positions
   meshes.forEach((m, i) => {
-    const wp = m.position.clone();
-    wp.y -= 1.55;
-    const sp = toScreen(wp);
+    _wpv.copy(m.position);
+    _wpv.y -= 1.55;
+    const sp = toScreen(_wpv);
     labelEls[i].style.left = sp.x + 'px';
     labelEls[i].style.top  = sp.y + 'px';
   });
@@ -1222,6 +1422,31 @@ function tick() {
 tick();
 
 // ── Resize ────────────────────────────────────────────────
+// ── Mouse trail ───────────────────────────────────────────
+let _trailX = -999, _trailY = -999;
+window.addEventListener('mousemove', e => {
+  const dx = e.clientX - _trailX, dy = e.clientY - _trailY;
+  if (dx*dx + dy*dy < 16) return;
+  _trailX = e.clientX; _trailY = e.clientY;
+  const dot = document.createElement('div');
+  dot.style.cssText = `
+    position:fixed;
+    left:${e.clientX}px;
+    top:${e.clientY}px;
+    width:7px; height:7px;
+    border-radius:50%;
+    background:#d0eaff;
+    box-shadow:0 0 8px 3px rgba(140,200,255,0.7);
+    pointer-events:none;
+    z-index:9999;
+    animation:trailFade 0.6s ease-out forwards;
+  `;
+  document.body.appendChild(dot);
+  dot.addEventListener('animationend', () => dot.remove());
+});
+
+let aboutOpen = false;
+
 // ── About sidebar toggle ───────────────────────────────────
 const aboutTab     = document.getElementById('about-tab');
 const aboutSidebar = document.getElementById('about-sidebar');
