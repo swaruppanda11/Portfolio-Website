@@ -269,16 +269,37 @@
     }
     .skill-pct { font-size: 0.65rem; color: #555; text-align: right; }
 
-    /* Projects */
-    .project {
-      border-top: 1px solid #0d0d0d;
-      padding: 22px 0;
-    }
-    .project:first-child { border-top: none; padding-top: 0; }
-    .proj-num { font-size: 0.65rem; color: #555; letter-spacing: 0.15em; margin-bottom: 8px; }
-    .project-name { color: #ddd; margin-bottom: 7px; font-size: 0.92rem; letter-spacing: 0.04em; }
+    /* Projects carousel */
+    .proj-slide { display: none; }
+    .proj-slide.active { display: block; animation: proj-fade 0.28s ease; }
+    @keyframes proj-fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .proj-num { font-size: 0.65rem; color: #555; letter-spacing: 0.15em; margin-bottom: 14px; }
+    .project-name { color: #ddd; margin-bottom: 12px; font-size: 1.0rem; letter-spacing: 0.04em; }
     .project-desc { color: #666; font-size: 0.84rem; line-height: 1.9; }
-    .project-tags { margin-top: 10px; color: #444; font-size: 0.65rem; letter-spacing: 0.15em; }
+    .project-tags { margin-top: 14px; color: #444; font-size: 0.65rem; letter-spacing: 0.15em; }
+    .proj-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 34px;
+      padding-top: 22px;
+      border-top: 1px solid #0d0d0d;
+    }
+    .proj-arrow {
+      background: none;
+      border: none;
+      color: #444;
+      font-size: 0.65rem;
+      letter-spacing: 0.22em;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+      transition: color 0.2s;
+    }
+    .proj-arrow:hover { color: #ccc; }
+    .proj-dots { display: flex; gap: 8px; align-items: center; }
+    .proj-dot { width: 3px; height: 3px; border-radius: 50%; background: #2a2a2a; transition: background 0.2s; }
+    .proj-dot.active { background: #777; }
 
     /* Contact */
     .contact-row {
@@ -818,6 +839,42 @@ for (let n = 0; n < 5; n++) {
   });
 }
 
+// ── Kuiper Belt ───────────────────────────────────────────
+const kuiperCount  = 1600;
+const kuiperPos    = new Float32Array(kuiperCount * 3);
+const kuiperCol    = new Float32Array(kuiperCount * 3);
+const kInner = 6.8, kOuter = 10.2;
+const kTilt  = Math.PI * 0.045; // ~8° inclination
+
+for (let i = 0; i < kuiperCount; i++) {
+  const ang = Math.random() * Math.PI * 2;
+  const r   = kInner + Math.random() * (kOuter - kInner);
+  const x   = Math.cos(ang) * r;
+  const y   = (Math.random() - 0.5) * 1.4;
+  const z   = Math.sin(ang) * r;
+  // tilt around X axis
+  kuiperPos[i*3]   = x;
+  kuiperPos[i*3+1] = y * Math.cos(kTilt) - z * Math.sin(kTilt);
+  kuiperPos[i*3+2] = y * Math.sin(kTilt) + z * Math.cos(kTilt);
+  // icy blue-white palette
+  const b = 0.55 + Math.random() * 0.45;
+  kuiperCol[i*3]   = b * 0.70;
+  kuiperCol[i*3+1] = b * 0.84;
+  kuiperCol[i*3+2] = b;
+}
+const kuiperGeo = new THREE.BufferGeometry();
+kuiperGeo.setAttribute('position', new THREE.BufferAttribute(kuiperPos, 3));
+kuiperGeo.setAttribute('color',    new THREE.BufferAttribute(kuiperCol, 3));
+const kuiperBelt = new THREE.Points(kuiperGeo, new THREE.PointsMaterial({
+  vertexColors:    true,
+  size:            0.038,
+  sizeAttenuation: false,
+  transparent:     true,
+  opacity:         0.72,
+  fog:             false,
+}));
+scene.add(kuiperBelt);
+
 // ── Supernovas ────────────────────────────────────────────
 const supernovas = Array.from({ length: 6 }, (_, i) => {
   const group = new THREE.Group();
@@ -1045,6 +1102,22 @@ function closePanel() {
 document.getElementById('close-btn').addEventListener('click', closePanel);
 document.addEventListener('keydown', e => e.key === 'Escape' && closePanel());
 
+panelBody.addEventListener('click', e => {
+  const arrow = e.target.closest('.proj-arrow');
+  if (!arrow) return;
+  const carousel = panelBody.querySelector('.proj-carousel');
+  if (!carousel) return;
+  const slides = carousel.querySelectorAll('.proj-slide');
+  const dots   = carousel.querySelectorAll('.proj-dot');
+  let cur = parseInt(carousel.dataset.cur);
+  cur = arrow.classList.contains('proj-next')
+    ? (cur + 1) % slides.length
+    : (cur - 1 + slides.length) % slides.length;
+  slides.forEach((s, i) => s.classList.toggle('active', i === cur));
+  dots.forEach((d, i)   => d.classList.toggle('active', i === cur));
+  carousel.dataset.cur = cur;
+});
+
 // ── Content ───────────────────────────────────────────────
 function buildSkills() {
   const skills = [
@@ -1079,13 +1152,25 @@ function buildProjects() {
       tags: 'c · tcp sockets · md5 · multi-threading',
     },
   ];
-  return projects.map((p, i) => `
-    <div class="project">
-      <div class="proj-num">0${i + 1}</div>
+  const n = projects.length;
+  const slides = projects.map((p, i) => `
+    <div class="proj-slide${i === 0 ? ' active' : ''}">
+      <div class="proj-num">0${i + 1} — 0${n}</div>
       <div class="project-name">${p.name}</div>
       <div class="project-desc">${p.desc}</div>
       <div class="project-tags">${p.tags}</div>
     </div>`).join('');
+  const dots = projects.map((_, i) =>
+    `<span class="proj-dot${i === 0 ? ' active' : ''}"></span>`).join('');
+  return `
+    <div class="proj-carousel" data-cur="0">
+      ${slides}
+      <div class="proj-nav">
+        <button class="proj-arrow proj-prev">← PREV</button>
+        <div class="proj-dots">${dots}</div>
+        <button class="proj-arrow proj-next">NEXT →</button>
+      </div>
+    </div>`;
 }
 
 function buildContact() {
@@ -1309,6 +1394,9 @@ function tick() {
     }
   });
 
+
+  // Rotate Kuiper Belt
+  kuiperBelt.rotation.y += 0.00012;
 
   // Animate satellites
   satellites.forEach(sat => {
