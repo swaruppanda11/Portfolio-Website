@@ -543,7 +543,7 @@ const SECTIONS = [
   {
     label:    'SKILLS',
     geo:      new THREE.IcosahedronGeometry(0.92, 2),
-    pos:      [-4.0, 0, 0],
+    pos:      [-4.0, 0, -0.55],
     rSpeed:   [0.002, 0.003],
     ringCol:  0xff99aa,
     panel:    buildSkills,
@@ -551,7 +551,7 @@ const SECTIONS = [
   {
     label:    'PROJECTS',
     geo:      new THREE.OctahedronGeometry(0.92, 2),
-    pos:      [0, 0, 0],
+    pos:      [0, 0.15, 0.35],
     rSpeed:   [0.0025, 0.002],
     ringCol:  0xaaccff,
     panel:    buildProjects,
@@ -559,7 +559,7 @@ const SECTIONS = [
   {
     label:    'CONTACT',
     geo:      new THREE.TorusGeometry(0.62, 0.21, 7, 14),
-    pos:      [4.0, 0, 0],
+    pos:      [4.0, -0.08, -0.35],
     rSpeed:   [0.0015, 0.0035],
     ringCol:  0x2db87a,
     panel:    buildContact,
@@ -684,7 +684,7 @@ scene.add(new THREE.Points(pGeo,
 
 // ── Stars (background, fog-independent) ───────────────────
 // Parallax factors: layer 0 = far/small, layer 2 = close/bright
-const starParallax = [0.18, 0.42, 0.72];
+const starParallax = [0.08, 0.35, 0.85];
 const starLayers = [
   { count: 2500, size: 1.4, baseOp: 0.72, speed: 0.35, phase: 0.00 },
   { count: 1200, size: 0.9, baseOp: 0.50, speed: 0.65, phase: 2.09 },
