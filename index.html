@@ -329,7 +329,10 @@
       padding: 14px 7px;
       border: 1px solid #33435e;
       border-left: none;
-      background: rgba(2,2,2,0.88);
+      border-radius: 0 10px 10px 0;
+      background: rgba(20,32,60,0.68);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       cursor: pointer;
       user-select: none;
       transition: color 0.2s, left 0.45s cubic-bezier(0.4,0,0.2,1);
@@ -339,22 +342,27 @@
 
     #about-sidebar {
       position: fixed;
-      top: 0; left: 0; bottom: 0;
+      top: 50%; left: 20px;
       width: 248px;
-      background: rgba(2,2,2,0.92);
+      height: min(720px, calc(100vh - 80px));
+      overflow-y: auto;
+      background: rgba(20,32,60,0.68);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      border-right: 1px solid #33435e;
+      border: 1px solid rgba(138,169,220,0.38);
+      border-radius: 20px;
+      box-shadow: 0 28px 70px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 42px rgba(95,138,255,0.08);
       z-index: 20;
-      transform: translateX(-248px);
-      transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+      transform: perspective(900px) translate(calc(-100% - 24px), -50%) rotateY(8deg);
+      transform-origin: left center;
+      transition: transform 0.5s cubic-bezier(0.2,0.8,0.2,1);
       pointer-events: all;
       display: flex;
       flex-direction: column;
       padding: 52px 28px 36px;
       gap: 0;
     }
-    #about-sidebar.open { transform: translateX(0); }
+    #about-sidebar.open { transform: perspective(900px) translate(0, -50%) rotateY(0); }
     #about-sidebar::before, #about-sidebar::after {
       content: '';
       position: absolute;
@@ -364,7 +372,7 @@
     }
     #about-sidebar::before { top: 0; }
     #about-sidebar::after  { bottom: 0; }
-    #about-tab.open { left: 248px; color: #666; }
+    #about-tab.open { left: 268px; color: #c0cad8; }
     .sb-tick { position: absolute; width: 7px; height: 7px; }
     .sb-tick-tl { top: 18px; left: 18px; border-top: 1px solid #2a2a2a; border-left: 1px solid #2a2a2a; }
     .sb-tick-br { bottom: 18px; right: 18px; border-bottom: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
