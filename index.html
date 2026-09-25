@@ -160,17 +160,17 @@
       height: 13px;
     }
     .brk-tl { top:0; left:0;
-      border-top: 1px solid rgba(255,255,255,0.45);
-      border-left: 1px solid rgba(255,255,255,0.45); }
+      border-top: 1px solid var(--target-color, rgba(255,255,255,0.45));
+      border-left: 1px solid var(--target-color, rgba(255,255,255,0.45)); }
     .brk-tr { top:0; right:0;
-      border-top: 1px solid rgba(255,255,255,0.45);
-      border-right: 1px solid rgba(255,255,255,0.45); }
+      border-top: 1px solid var(--target-color, rgba(255,255,255,0.45));
+      border-right: 1px solid var(--target-color, rgba(255,255,255,0.45)); }
     .brk-bl { bottom:0; left:0;
-      border-bottom: 1px solid rgba(255,255,255,0.45);
-      border-left: 1px solid rgba(255,255,255,0.45); }
+      border-bottom: 1px solid var(--target-color, rgba(255,255,255,0.45));
+      border-left: 1px solid var(--target-color, rgba(255,255,255,0.45)); }
     .brk-br { bottom:0; right:0;
-      border-bottom: 1px solid rgba(255,255,255,0.45);
-      border-right: 1px solid rgba(255,255,255,0.45); }
+      border-bottom: 1px solid var(--target-color, rgba(255,255,255,0.45));
+      border-right: 1px solid var(--target-color, rgba(255,255,255,0.45)); }
     #target-lbl {
       position: absolute;
       bottom: -20px;
@@ -178,7 +178,7 @@
       transform: translateX(-50%);
       font-size: 0.6rem;
       letter-spacing: 0.2em;
-      color: rgba(255,255,255,0.35);
+      color: var(--target-color, rgba(255,255,255,0.35));
       white-space: nowrap;
       animation: blink 1.4s ease-in-out infinite;
     }
@@ -804,7 +804,7 @@ for (let g = 0; g < 2; g++) {
 
 // — Nebulae — spread evenly across the visible front hemisphere ——
 // Camera looks toward -Z; theta spreads around screen, phi keeps within FOV
-const nebulaPalette = [0x9966ff, 0xff5599, 0x44aaff, 0xff8844, 0xcc44ff];
+const nebulaPalette = [0x7a6cff, 0x9b6cff, 0x4aa8ff];
 for (let n = 0; n < 5; n++) {
   const th  = (n / 5) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
   const ph  = 0.18 + Math.random() * 0.52; // 10°–40° from screen centre
@@ -1430,11 +1430,12 @@ function tick() {
     const idx = hoveredMesh.userData.idx;
       hoveredMesh.material.opacity         = 1;
       hoveredMesh.userData.glowMat.opacity = 0.7;
-      scaleV.setScalar(1.11);
+      const pulse = Math.sin(t * 5) * 0.025;
+      scaleV.setScalar(1.12 + pulse);
       hoveredMesh.scale.lerp(scaleV, 0.1);
       labelEls[idx].classList.add('active');
-      SECTIONS[idx].rings.forEach(r => { r.material.opacity = 0.28; });
-      accentLights[idx].intensity = 1.6;
+      SECTIONS[idx].rings.forEach(r => { r.material.opacity = 0.34 + pulse; });
+      accentLights[idx].intensity = 1.8 + pulse * 8;
       if (idx < 2) innerShapes[idx].material.opacity = 0.82;
   }
 
@@ -1459,6 +1460,7 @@ function tick() {
     targetEl.style.width        = size + 'px';
     targetEl.style.height       = size + 'px';
     targetLbl.textContent       = hoveredMesh.userData.section.label;
+    targetEl.style.setProperty('--target-color', `#${hoveredMesh.userData.section.ringCol.toString(16).padStart(6, '0')}`);
     targetEl.classList.add('show');
   } else {
     targetEl.classList.remove('show');
