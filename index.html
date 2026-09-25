@@ -714,7 +714,7 @@ const lensStarVert = `
     float lensStrength = 1.0 - smoothstep(2.5, 20.0, distanceToLens);
     world.xyz += normalize(world.xyz - uLensPosition) * lensStrength * 6.0;
     vColor = color;
-    gl_PointSize = uSize * (1.0 + lensStrength * 0.6);
+    gl_PointSize = uSize * 1.35 * (1.0 + lensStrength * 0.6);
     gl_Position = projectionMatrix * viewMatrix * world;
   }
 `;
@@ -722,8 +722,10 @@ const lensStarFrag = `
   uniform float uOpacity;
   varying vec3 vColor;
   void main() {
-    float edge = 1.0 - smoothstep(0.32, 0.5, distance(gl_PointCoord, vec2(0.5)));
-    gl_FragColor = vec4(vColor, uOpacity * edge);
+    float distanceFromCore = distance(gl_PointCoord, vec2(0.5));
+    float core = 1.0 - smoothstep(0.0, 0.16, distanceFromCore);
+    float halo = 1.0 - smoothstep(0.08, 0.5, distanceFromCore);
+    gl_FragColor = vec4(vColor * (0.7 + core * 0.8), uOpacity * (core + halo * 0.55));
   }
 `;
 
@@ -752,6 +754,7 @@ starLayers.forEach((sl, li) => {
       uOpacity:      { value: sl.baseOp },
     },
     transparent: true,
+    blending: THREE.AdditiveBlending,
     depthWrite: false,
   });
   const pts = new THREE.Points(geo, mat);
