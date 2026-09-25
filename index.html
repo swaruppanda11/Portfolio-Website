@@ -703,6 +703,28 @@ function starColor() {
 
 const starMats   = [];
 const starPoints = [];   // stored for parallax animation
+const lensStarVert = `
+  uniform vec3 uLensPosition;
+  uniform float uSize;
+  varying vec3 vColor;
+  void main() {
+    vec4 world = modelMatrix * vec4(position, 1.0);
+    float distanceToLens = distance(world.xyz, uLensPosition);
+    float lensStrength = 1.0 - smoothstep(2.5, 20.0, distanceToLens);
+    world.xyz += normalize(world.xyz - uLensPosition) * lensStrength * 6.0;
+    vColor = color;
+    gl_PointSize = uSize * (1.0 + lensStrength * 0.6);
+    gl_Position = projectionMatrix * viewMatrix * world;
+  }
+`;
+const lensStarFrag = `
+  uniform float uOpacity;
+  varying vec3 vColor;
+  void main() {
+    float edge = 1.0 - smoothstep(0.32, 0.5, distance(gl_PointCoord, vec2(0.5)));
+    gl_FragColor = vec4(vColor, uOpacity * edge);
+  }
+`;
 
 starLayers.forEach((sl, li) => {
   const pos = new Float32Array(sl.count * 3);
@@ -720,19 +742,39 @@ starLayers.forEach((sl, li) => {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
-  const mat = new THREE.PointsMaterial({
-    vertexColors:    true,
-    size:            sl.size,
-    sizeAttenuation: false,
-    transparent:     true,
-    opacity:         sl.baseOp,
-    fog:             false,
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: lensStarVert,
+    fragmentShader: lensStarFrag,
+    uniforms: {
+      uLensPosition: { value: new THREE.Vector3() },
+      uSize:         { value: sl.size },
+      uOpacity:      { value: sl.baseOp },
+    },
+    transparent: true,
+    depthWrite: false,
   });
   const pts = new THREE.Points(geo, mat);
   scene.add(pts);
   starPoints.push(pts);
   starMats.push({ mat, baseOp: sl.baseOp, speed: sl.speed, phase: sl.phase });
 });
+
+// ── Black hole / gravitational lens ──────────────────────
+const blackHole = new THREE.Group();
+const blackCore = new THREE.Mesh(
+  new THREE.SphereGeometry(3, 32, 32),
+  new THREE.MeshBasicMaterial({ color: 0x000000, depthWrite: true })
+);
+const accretionDisk = new THREE.Mesh(
+  new THREE.TorusGeometry(4.8, 0.09, 8, 80),
+  new THREE.MeshBasicMaterial({ color: 0x8d7aff, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false })
+);
+const accretionGlow = new THREE.Mesh(
+  new THREE.TorusGeometry(5.8, 0.035, 8, 80),
+  new THREE.MeshBasicMaterial({ color: 0x4aa8ff, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false })
+);
+blackHole.add(blackCore, accretionDisk, accretionGlow);
+scene.add(blackHole);
 
 
 // ── Space features ────────────────────────────────────────
@@ -1278,9 +1320,16 @@ function tick() {
     }
   });
 
-  // Twinkle stars
+  // Drift the lens across the visible star field.
+  blackHole.position.set(Math.sin(t * 0.13) * 24, Math.cos(t * 0.09) * 13, -126);
+  blackHole.lookAt(camera.position);
+  accretionDisk.rotation.z += 0.018;
+  accretionGlow.rotation.z -= 0.011;
+
+  // Twinkle and gravitationally lens stars near the black hole.
   starMats.forEach(s => {
-    s.mat.opacity = s.baseOp + Math.sin(t * s.speed + s.phase) * 0.13;
+    s.mat.uniforms.uOpacity.value = s.baseOp + Math.sin(t * s.speed + s.phase) * 0.13;
+    s.mat.uniforms.uLensPosition.value.copy(blackHole.position);
   });
 
   // Camera parallax + bob
