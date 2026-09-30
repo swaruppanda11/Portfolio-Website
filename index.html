@@ -710,14 +710,15 @@ scene.add(new THREE.Points(pGeo,
 ));
 
 // ── Stars (background, fog-independent) ───────────────────
-// Parallax factors: layer 0 = far/small, layer 4 = close/bright
-const starParallax = [0.08, 0.2, 0.35, 0.6, 0.85];
+// The final layer sits near the nodes, so its depth supplies the parallax.
+const starParallax = [0.08, 0.2, 0.35, 0.6, 0.85, 0];
 const starLayers = [
   { count: 2500, size: 1.4, baseOp: 0.72, speed: 0.35, phase: 0.00 },
   { count:  500, size: 1.0, baseOp: 0.60, speed: 0.50, phase: 1.05 },
   { count: 1200, size: 0.9, baseOp: 0.50, speed: 0.65, phase: 2.09 },
   { count:  360, size: 1.6, baseOp: 0.72, speed: 0.40, phase: 3.14 },
   { count:  600, size: 2.1, baseOp: 0.95, speed: 0.22, phase: 4.19 },
+  { count:  180, size: 1.4, baseOp: 0.45, speed: 0.40, phase: 5.20, near: true },
 ];
 
 // Star spectral colour palette (weighted toward white)
@@ -737,12 +738,18 @@ starLayers.forEach((sl, li) => {
   const pos = new Float32Array(sl.count * 3);
   const col = new Float32Array(sl.count * 3);
   for (let i = 0; i < sl.count; i++) {
-    const theta = Math.random() * Math.PI * 2;
-    const phi   = Math.acos(2 * Math.random() - 1);
-    const r     = 110 + Math.random() * 60;
-    pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
-    pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
-    pos[i*3+2] = r * Math.cos(phi);
+    if (sl.near) {
+      pos[i*3]   = (Math.random() - 0.5) * 70;
+      pos[i*3+1] = (Math.random() - 0.5) * 42;
+      pos[i*3+2] = -14 - Math.random() * 16;
+    } else {
+      const theta = Math.random() * Math.PI * 2;
+      const phi   = Math.acos(2 * Math.random() - 1);
+      const r    = 110 + Math.random() * 60;
+      pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+      pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+      pos[i*3+2] = r * Math.cos(phi);
+    }
     const [cr, cg, cb] = starColor();
     col[i*3] = cr; col[i*3+1] = cg; col[i*3+2] = cb;
   }
