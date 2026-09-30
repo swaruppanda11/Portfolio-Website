@@ -901,16 +901,16 @@ for (let c = 0; c < 4; c++) {
   })));
 }
 
-// — Distant spiral galaxies: bright nuclei and loosely wound star arms —
-const galaxySites = [[-0.78, 0.58], [-0.68, -0.62], [0.05, 0.78], [0.74, 0.54], [0.76, -0.60]];
-const galaxyColors = [0x9dbdff, 0xb8aaff, 0x9ed6f5, 0xc4b8ff, 0x9bb9e8];
+// — Distant spiral galaxies: faint nuclei and loosely wound star arms —
+const galaxySites = [[-0.78, 0.58], [-0.68, -0.62], [0.76, 0.54]];
+const galaxyColors = [0x91a5c1, 0xaaa2bb, 0x96b4c0];
 const galaxyGroups = [];
 const galaxyGlowCanvas = document.createElement('canvas');
 galaxyGlowCanvas.width = galaxyGlowCanvas.height = 64;
 const galaxyGlowCtx = galaxyGlowCanvas.getContext('2d');
 const galaxyGlow = galaxyGlowCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
-galaxyGlow.addColorStop(0, 'rgba(255,245,221,0.9)');
-galaxyGlow.addColorStop(0.22, 'rgba(255,214,170,0.35)');
+galaxyGlow.addColorStop(0, 'rgba(255,245,221,0.5)');
+galaxyGlow.addColorStop(0.22, 'rgba(255,214,170,0.12)');
 galaxyGlow.addColorStop(1, 'rgba(255,190,155,0)');
 galaxyGlowCtx.fillStyle = galaxyGlow;
 galaxyGlowCtx.fillRect(0, 0, 64, 64);
@@ -922,7 +922,7 @@ for (let g = 0; g < galaxySites.length; g++) {
   const pos = new Float32Array(count * 3);
   const col = new Float32Array(count * 3);
   const armColor = new THREE.Color(galaxyColors[g]);
-  const coreColor = new THREE.Color(0xffe4bd);
+  const coreColor = new THREE.Color(0xc9b9aa);
   for (let i = 0; i < count; i++) {
     const core = i < 180;
     const radius = core ? Math.sqrt(Math.random()) * 1.5 : 1.1 + Math.sqrt(Math.random()) * 5.9;
@@ -943,14 +943,14 @@ for (let g = 0; g < galaxySites.length; g++) {
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   galaxy.add(new THREE.Points(geo, new THREE.PointsMaterial({
     vertexColors: true, size: 1.7, sizeAttenuation: false,
-    transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending,
+    transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending,
     depthWrite: false, fog: false,
   })));
   const nucleus = new THREE.Sprite(new THREE.SpriteMaterial({
     map: galaxyGlowTexture, transparent: true, blending: THREE.AdditiveBlending,
     depthWrite: false, fog: false,
   }));
-  nucleus.scale.set(4.5, 4.5, 1);
+  nucleus.scale.set(3.6, 3.6, 1);
   galaxy.add(nucleus);
   galaxy.rotation.z = g * 0.9;
   galaxy.rotation.x = 0.15 + (g % 3) * 0.22;
