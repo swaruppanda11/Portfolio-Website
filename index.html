@@ -237,6 +237,10 @@
       position: absolute;
       top: 20px;
       right: 24px;
+      padding: 0;
+      border: 0;
+      background: none;
+      font-family: inherit;
       font-size: 0.65rem;
       letter-spacing: 0.2em;
       color: #555;
@@ -245,6 +249,7 @@
       transition: color 0.2s;
     }
     #close-btn:hover { color: #fff; }
+    #close-btn:focus-visible { color: #fff; outline: 1px solid #52617a; outline-offset: 4px; }
 
     /* Scrollbar */
     #panel::-webkit-scrollbar { width: 1px; }
@@ -315,12 +320,22 @@
     .contact-val a:hover { color: #fff; }
 
     /* Pull tab */
-    #about-tab {
+    #about-drawer {
       position: fixed;
+      top: 50%; left: 20px;
+      width: min(248px, calc(100vw - 52px));
+      z-index: 20;
+      transform: translate(calc(-100% - 20px), -50%);
+      transition: transform 0.5s cubic-bezier(0.2,0.8,0.2,1);
+    }
+    #about-drawer.open { transform: translate(0, -50%); }
+    #about-tab {
+      position: absolute;
       top: 50%;
-      left: 0;
+      left: 100%;
       transform: translateY(-50%);
       z-index: 21;
+      font-family: inherit;
       writing-mode: vertical-rl;
       text-orientation: mixed;
       font-size: 0.72rem;
@@ -335,15 +350,14 @@
       -webkit-backdrop-filter: blur(14px);
       cursor: pointer;
       user-select: none;
-      transition: color 0.2s, left 0.45s cubic-bezier(0.4,0,0.2,1);
+      transition: color 0.2s;
     }
-    #about-tab.open { color: #888; }
+    #about-drawer.open #about-tab { color: #c0cad8; }
     #about-tab:hover { color: #aaa; }
 
     #about-sidebar {
-      position: fixed;
-      top: 50%; left: 20px;
-      width: 248px;
+      position: relative;
+      width: 100%;
       height: min(720px, calc(100vh - 80px));
       overflow-y: auto;
       background: rgba(3,7,15,0.82);
@@ -352,17 +366,12 @@
       border: 1px solid rgba(138,169,220,0.38);
       border-radius: 20px;
       box-shadow: 0 28px 70px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 42px rgba(95,138,255,0.04);
-      z-index: 20;
-      transform: perspective(900px) translate(calc(-100% - 24px), -50%) rotateY(8deg);
-      transform-origin: left center;
-      transition: transform 0.5s cubic-bezier(0.2,0.8,0.2,1);
       pointer-events: all;
       display: flex;
       flex-direction: column;
       padding: 52px 28px 36px;
       gap: 0;
     }
-    #about-sidebar.open { transform: perspective(900px) translate(0, -50%) rotateY(0); }
     #about-sidebar::before, #about-sidebar::after {
       content: '';
       position: absolute;
@@ -372,7 +381,6 @@
     }
     #about-sidebar::before { top: 0; }
     #about-sidebar::after  { bottom: 0; }
-    #about-tab.open { left: 268px; color: #c0cad8; }
     .sb-tick { position: absolute; width: 7px; height: 7px; }
     .sb-tick-tl { top: 18px; left: 18px; border-top: 1px solid #2a2a2a; border-left: 1px solid #2a2a2a; }
     .sb-tick-br { bottom: 18px; right: 18px; border-bottom: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
@@ -394,7 +402,8 @@
 <div id="frame"></div>
 
 <!-- About sidebar -->
-<div id="about-tab">ABOUT</div>
+<div id="about-drawer">
+<button id="about-tab" type="button" aria-controls="about-sidebar" aria-expanded="false">ABOUT</button>
 <div id="about-sidebar">
   <div class="sb-tick sb-tick-tl"></div>
   <div class="sb-tick sb-tick-br"></div>
@@ -433,6 +442,7 @@
 
   <div class="sb-footer">// SYS.PROFILE · v1.0</div>
 </div>
+</div>
 
 <div class="hud" id="hud-tl">SYS // ONLINE<br>3 NODES ACTIVE</div>
 <div class="hud" id="hud-tr">PORTFOLIO // v1.0<br>2026</div>
@@ -456,9 +466,9 @@
   <div id="target-lbl">SELECT</div>
 </div>
 
-<div id="panel">
+<div id="panel" inert>
   <div id="panel-accent"></div>
-  <span id="close-btn">ESC</span>
+  <button id="close-btn" type="button" aria-label="Close panel">ESC</button>
   <div id="panel-title"></div>
   <div id="panel-body"></div>
 </div>
@@ -479,13 +489,13 @@ document.body.prepend(renderer.domElement);
 // ── Scene / Camera ────────────────────────────────────────
 const scene  = new THREE.Scene();
 scene.fog    = new THREE.FogExp2(0x000000, 0.042);
-const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 200);
+const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 300);
 camera.position.set(0, 0.3, 9);
 
 // ── Lights ────────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+scene.add(new THREE.AmbientLight(0xffffff, 0.14));
 
-const sunLight = new THREE.DirectionalLight(0xfff5d0, 1.1);
+const sunLight = new THREE.DirectionalLight(0xfff5d0, 1.8);
 sunLight.position.set(4, 8, 5);
 scene.add(sunLight);
 
@@ -553,7 +563,7 @@ const SECTIONS = [
     geo:      new THREE.IcosahedronGeometry(0.92, 2),
     pos:      [-4.0, 0, -0.55],
     rSpeed:   [0.002, 0.003],
-    ringCol:  0xff99aa,
+    ringCol:  ACCENT_COLORS[0],
     panel:    buildSkills,
   },
   {
@@ -561,7 +571,7 @@ const SECTIONS = [
     geo:      new THREE.OctahedronGeometry(0.92, 2),
     pos:      [0, 0.15, 0.35],
     rSpeed:   [0.0025, 0.002],
-    ringCol:  0xaaccff,
+    ringCol:  ACCENT_COLORS[1],
     panel:    buildProjects,
   },
   {
@@ -569,7 +579,7 @@ const SECTIONS = [
     geo:      new THREE.TorusGeometry(0.62, 0.21, 7, 14),
     pos:      [4.0, -0.08, -0.35],
     rSpeed:   [0.0015, 0.0035],
-    ringCol:  0x2db87a,
+    ringCol:  ACCENT_COLORS[2],
     panel:    buildContact,
   },
 ];
@@ -578,6 +588,8 @@ const SECTIONS = [
 const meshes = SECTIONS.map((s, i) => {
   const mat  = new THREE.MeshStandardMaterial({
     color:       s.ringCol,
+    emissive:    s.ringCol,
+    emissiveIntensity: 0.09,
     wireframe:   true,
     transparent: true,
     opacity:     0,
@@ -590,7 +602,9 @@ const meshes = SECTIONS.map((s, i) => {
 
   // Glow layer — slightly larger copy to simulate line thickness
   const glowMat = new THREE.MeshStandardMaterial({
-    color: s.ringCol, wireframe: true, transparent: true, opacity: 0,
+    color: s.ringCol, emissive: s.ringCol, emissiveIntensity: 0.07,
+    wireframe: true, transparent: true, opacity: 0,
+    blending: THREE.AdditiveBlending, depthWrite: false,
   });
   const glow = new THREE.Mesh(s.geo, glowMat);
   glow.scale.setScalar(1.045);
@@ -696,11 +710,13 @@ scene.add(new THREE.Points(pGeo,
 ));
 
 // ── Stars (background, fog-independent) ───────────────────
-// Parallax factors: layer 0 = far/small, layer 2 = close/bright
-const starParallax = [0.08, 0.35, 0.85];
+// Parallax factors: layer 0 = far/small, layer 4 = close/bright
+const starParallax = [0.08, 0.2, 0.35, 0.6, 0.85];
 const starLayers = [
   { count: 2500, size: 1.4, baseOp: 0.72, speed: 0.35, phase: 0.00 },
+  { count:  500, size: 1.0, baseOp: 0.60, speed: 0.50, phase: 1.05 },
   { count: 1200, size: 0.9, baseOp: 0.50, speed: 0.65, phase: 2.09 },
+  { count:  360, size: 1.6, baseOp: 0.72, speed: 0.40, phase: 3.14 },
   { count:  600, size: 2.1, baseOp: 0.95, speed: 0.22, phase: 4.19 },
 ];
 
@@ -748,21 +764,94 @@ starLayers.forEach((sl, li) => {
 });
 
 // ── Black hole / gravitational lens ──────────────────────
-const blackHole = new THREE.Group();
-const blackCore = new THREE.Mesh(
-  new THREE.SphereGeometry(3, 32, 32),
-  new THREE.MeshBasicMaterial({ color: 0x000000, depthWrite: true })
+const blackHoleTexture = new THREE.TextureLoader().load('black-hole.png');
+blackHoleTexture.colorSpace = THREE.SRGBColorSpace;
+
+const blackHole = new THREE.Mesh(
+  new THREE.PlaneGeometry(56, 28),
+  new THREE.MeshBasicMaterial({
+    map: blackHoleTexture,
+    transparent: true, depthWrite: false, fog: false,
+  })
 );
-const accretionDisk = new THREE.Mesh(
-  new THREE.TorusGeometry(4.8, 0.09, 8, 80),
-  new THREE.MeshBasicMaterial({ color: 0x8d7aff, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false })
-);
-const accretionGlow = new THREE.Mesh(
-  new THREE.TorusGeometry(5.8, 0.035, 8, 80),
-  new THREE.MeshBasicMaterial({ color: 0x4aa8ff, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false })
-);
-blackHole.add(blackCore, accretionDisk, accretionGlow);
+blackHole.renderOrder = -2;
 scene.add(blackHole);
+
+// Animated gas sits on top of the static lens; only this smaller texture changes.
+const flowCanvas = document.createElement('canvas');
+flowCanvas.width = 768;
+flowCanvas.height = 384;
+const flow = flowCanvas.getContext('2d');
+const flowTexture = new THREE.CanvasTexture(flowCanvas);
+const flowingGas = new THREE.Mesh(
+  blackHole.geometry,
+  new THREE.MeshBasicMaterial({
+    map: flowTexture, transparent: true, blending: THREE.AdditiveBlending,
+    depthWrite: false, fog: false,
+  })
+);
+flowingGas.renderOrder = -1;
+blackHole.add(flowingGas);
+
+function drawFlow(seconds) {
+  flow.setTransform(1, 0, 0, 1, 0, 0);
+  flow.clearRect(0, 0, 768, 384);
+  flow.translate(384, 192);
+  flow.scale(0.75, 0.75);
+  flow.shadowColor = '#ff7426';
+  flow.shadowBlur = 10;
+  for (let i = 0; i < 44; i++) {
+    const x = ((i * 173 + seconds * (30 + i % 5 * 10)) % 1040) - 520;
+    const lane = (i % 9 - 4) * 4;
+    const y = 34 - x * 0.074 + lane * (1 - Math.abs(x) / 700);
+    flow.beginPath();
+    flow.moveTo(x, y);
+    flow.quadraticCurveTo(x + 20, y - 2, x + 48, y - 3.5);
+    flow.strokeStyle = x > 15 ? '#ffe6a0' : '#ff7026';
+    flow.globalAlpha = Math.max(0, Math.min(0.65, (490 - Math.abs(x)) / 85)) * (0.5 + i % 4 * 0.15);
+    flow.lineWidth = i % 6 === 0 ? 2.5 : 1.2;
+    flow.stroke();
+  }
+  for (let i = 0; i < 15; i++) {
+    const a = Math.PI + ((i * 0.71 + seconds * 0.32) % Math.PI);
+    flow.beginPath();
+    flow.ellipse(0, 6, 136 + i % 4 * 3, 95 + i % 4 * 2, 0, a, a + 0.1);
+    flow.strokeStyle = Math.cos(a) > 0 ? '#ffe5a1' : '#ff762b';
+    flow.globalAlpha = 0.25 + i % 3 * 0.13;
+    flow.lineWidth = 1.8;
+    flow.stroke();
+  }
+  flow.globalAlpha = 1;
+  flowTexture.needsUpdate = true;
+}
+drawFlow(0);
+
+// ── International Space Station ──────────────────────────
+const iss = new THREE.Group();
+iss.scale.setScalar(0.8);
+const issHull = new THREE.MeshBasicMaterial({ color: 0xc4c9ce, fog: false });
+const issTruss = new THREE.MeshBasicMaterial({ color: 0x707b86, fog: false });
+const issFrame = new THREE.MeshBasicMaterial({ color: 0x9b673c, fog: false });
+const issSolar = new THREE.MeshBasicMaterial({ color: 0x182b55, fog: false });
+function addIssPart(geometry, material, x = 0, y = 0, z = 0) {
+  const part = new THREE.Mesh(geometry, material);
+  part.position.set(x, y, z);
+  iss.add(part);
+  return part;
+}
+addIssPart(new THREE.BoxGeometry(5.9, 0.09, 0.12), issTruss);
+addIssPart(new THREE.CylinderGeometry(0.24, 0.24, 1.7, 10), issHull, 0, 0, 0.16);
+addIssPart(new THREE.CylinderGeometry(0.22, 0.22, 1.7, 10), issHull, 0, 0, 0.12).rotation.z = Math.PI / 2;
+for (const x of [-0.9, 0.9]) addIssPart(new THREE.BoxGeometry(0.55, 0.5, 0.45), issHull, x, 0, 0.12);
+const solarFrameGeo = new THREE.BoxGeometry(0.7, 1.42, 0.03);
+const solarCellGeo = new THREE.BoxGeometry(0.64, 1.36, 0.04);
+for (const x of [-2.7, -1.95, 1.95, 2.7]) {
+  for (const y of [-1.05, 1.05]) {
+    addIssPart(solarFrameGeo, issFrame, x, y, -0.03);
+    addIssPart(solarCellGeo, issSolar, x, y, 0);
+  }
+}
+scene.add(iss);
 
 
 // ── Space features ────────────────────────────────────────
@@ -900,7 +989,7 @@ const kuiperBelt = new THREE.Points(kuiperGeo, new THREE.PointsMaterial({
   size:            0.038,
   sizeAttenuation: false,
   transparent:     true,
-  opacity:         0.72,
+  opacity:         0.9,
   fog:             false,
 }));
 scene.add(kuiperBelt);
@@ -1115,6 +1204,7 @@ const labelEls = SECTIONS.map(s => {
 function openPanel(section) {
   panelTitle.textContent = section.label;
   panelBody.innerHTML    = section.panel();
+  panel.inert = false;
   panel.classList.add('open');
   panelOpen = true;
   hintEl.style.opacity = '0';
@@ -1125,7 +1215,11 @@ function openPanel(section) {
 
 function closePanel() {
   panel.classList.remove('open');
+  panel.inert = true;
   panelOpen = false;
+  pendingPanel = null;
+  focusNode = null;
+  hoveredMesh = null;
   hintEl.style.opacity = '1';
 }
 
@@ -1224,7 +1318,6 @@ let camTargetX   = 0;
 let camTargetY   = 0;
 let hoveredMesh  = null;
 let _lastCursor  = '';   // skip redundant cursor style writes
-let cameraPush   = 0;
 let focusNode    = null;
 let linePulseT   = -1;
 let pendingPanel = null;
@@ -1237,17 +1330,17 @@ renderer.domElement.addEventListener('mousemove', e => {
   // Raycast here — only runs when mouse moves, not every frame
   raycaster.setFromCamera(_mouse, camera);
   const hits = raycaster.intersectObjects(meshes, false);
-  hoveredMesh = (!panelOpen && hits.length && hits[0].object.userData.idx != null)
+  hoveredMesh = (!panelOpen && !pendingPanel && hits.length && hits[0].object.userData.idx != null)
     ? hits[0].object : null;
 });
 
 renderer.domElement.addEventListener('click', () => {
   if (hoveredMesh && !panelOpen && !pendingPanel) {
     focusNode = hoveredMesh;
-    cameraPush = 1;
     linePulseT = 0;
     linePulse.material.color.setHex(hoveredMesh.userData.section.ringCol);
     pendingPanel = { section: hoveredMesh.userData.section, at: performance.now() + 700 };
+    hoveredMesh = null;
   }
 });
 
@@ -1273,7 +1366,7 @@ meshes.forEach((m, i) => {
     (function fade() {
       const p = Math.min((performance.now() - t0) / 900, 1);
       m.material.opacity          = p * 0.9;
-      m.userData.glowMat.opacity  = p * 0.5;
+      m.userData.glowMat.opacity  = p * 0.25;
       if (p < 1) requestAnimationFrame(fade);
     })();
   }, 200 + i * 220);
@@ -1282,6 +1375,8 @@ meshes.forEach((m, i) => {
 // ── Animate ───────────────────────────────────────────────
 let  t       = 0;
 const scaleV = new THREE.Vector3();
+let lastFlowFrame = 0;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 function tick() {
   requestAnimationFrame(tick);
@@ -1295,6 +1390,15 @@ function tick() {
     Math.sin(sa) * 42
   );
   sunLight.position.copy(sunSphere.position);
+
+  // A slow, wide orbit across the scene.
+  const issAngle = t * 0.055 + 0.8;
+  iss.position.set(
+    Math.cos(issAngle) * 40 * Math.min(1, camera.aspect / (16 / 9)),
+    Math.sin(issAngle) * 18, -45 + Math.sin(issAngle) * 5
+  );
+  iss.rotation.y = Math.sin(issAngle) * 0.16;
+  iss.rotation.z = -0.07 + Math.sin(issAngle) * 0.05;
 
   // Shooting stars
   shootingStars.forEach(ss => {
@@ -1316,11 +1420,19 @@ function tick() {
     }
   });
 
-  // Drift the lens across the visible star field.
-  blackHole.position.set(Math.sin(t * 0.13) * 24, Math.cos(t * 0.09) * 13, -126);
+  // Orbit the lens through the background, like the sun's slow pass.
+  const ba = t * 0.075;
+  const holeScale = Math.min(1, Math.max(0.45, camera.aspect / 1.4));
+  blackHole.scale.setScalar(holeScale);
+  blackHole.position.set(
+    Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 135 * camera.aspect * 0.47 + Math.cos(ba) * 8 * holeScale,
+    27 + Math.sin(ba * 0.7) * 5, -210
+  );
   blackHole.lookAt(camera.position);
-  accretionDisk.rotation.z += 0.018;
-  accretionGlow.rotation.z -= 0.011;
+  if (!reducedMotion.matches && performance.now() - lastFlowFrame > 45) {
+    lastFlowFrame = performance.now();
+    drawFlow(lastFlowFrame * 0.001);
+  }
 
   // ponytail: O(n) star warp; move this into a shader if the field grows much larger.
   // Twinkle and gravitationally lens stars near the black hole.
@@ -1370,12 +1482,8 @@ function tick() {
 
   // Camera parallax + bob
   const bobY = Math.sin(t * 0.4) * 0.14;
-  cameraPush = Math.max(0, cameraPush - 0.012);
-  const focusX = focusNode ? focusNode.position.x * cameraPush * 0.28 : 0;
-  const focusY = focusNode ? focusNode.position.y * cameraPush * 0.28 : 0;
-  camera.position.x += (camTargetX + focusX - camera.position.x) * 0.06;
-  camera.position.y += (camTargetY * 0.55 + focusY + bobY - camera.position.y) * 0.06;
-  camera.position.z += (9 - cameraPush * 1.8 - camera.position.z) * 0.08;
+  camera.position.x += (camTargetX - camera.position.x) * 0.06;
+  camera.position.y += (camTargetY * 0.55 + bobY - camera.position.y) * 0.06;
   camera.lookAt(0, 0, 0);
 
   // Star parallax — each layer drifts at its own rate with camera
@@ -1501,13 +1609,17 @@ function tick() {
   });
 
   // Reset inner shapes
-  innerShapes.forEach(s => { s.material.opacity = 0.18; });
+  innerShapes.forEach((s, i) => {
+    s.material.opacity = 0.18;
+    scaleV.setScalar(focusNode === meshes[i] ? 1.25 : 1);
+    s.scale.lerp(scaleV, 0.09);
+  });
 
   // Reset states
   meshes.forEach((m, i) => {
     m.material.opacity         = 0.9;
-    m.userData.glowMat.opacity = 0.5;
-    scaleV.setScalar(1);
+    m.userData.glowMat.opacity = 0.25;
+    scaleV.setScalar(m === focusNode ? 1.25 : 1);
     m.scale.lerp(scaleV, 0.09);
     labelEls[i].classList.remove('active');
     SECTIONS[i].rings.forEach(r => r.material.opacity > 0.04
@@ -1518,7 +1630,7 @@ function tick() {
   if (hoveredMesh) {
     const idx = hoveredMesh.userData.idx;
       hoveredMesh.material.opacity         = 1;
-      hoveredMesh.userData.glowMat.opacity = 0.7;
+      hoveredMesh.userData.glowMat.opacity = 0.4;
       const pulse = Math.sin(t * 5) * 0.025;
       scaleV.setScalar(1.12 + pulse);
       hoveredMesh.scale.lerp(scaleV, 0.1);
@@ -1583,14 +1695,12 @@ window.addEventListener('mousemove', e => {
   dot.addEventListener('animationend', () => dot.remove());
 });
 
-let aboutOpen = false;
-
 // ── About sidebar toggle ───────────────────────────────────
 const aboutTab     = document.getElementById('about-tab');
-const aboutSidebar = document.getElementById('about-sidebar');
+const aboutDrawer  = document.getElementById('about-drawer');
 aboutTab.addEventListener('click', () => {
-  const open = aboutSidebar.classList.toggle('open');
-  aboutTab.classList.toggle('open', open);
+  const open = aboutDrawer.classList.toggle('open');
+  aboutTab.setAttribute('aria-expanded', open);
 });
 
 window.addEventListener('resize', () => {
