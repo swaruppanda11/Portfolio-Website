@@ -904,13 +904,14 @@ for (let c = 0; c < 4; c++) {
 // — Distant spiral galaxies: faint nuclei and loosely wound star arms —
 const galaxySites = [[-0.78, 0.58], [-0.68, -0.62], [0.76, 0.54]];
 const galaxyColors = [0x91a5c1, 0xaaa2bb, 0x96b4c0];
+const galaxyDepth = 180;
 const galaxyGroups = [];
 const galaxyGlowCanvas = document.createElement('canvas');
 galaxyGlowCanvas.width = galaxyGlowCanvas.height = 64;
 const galaxyGlowCtx = galaxyGlowCanvas.getContext('2d');
 const galaxyGlow = galaxyGlowCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
-galaxyGlow.addColorStop(0, 'rgba(255,245,221,0.5)');
-galaxyGlow.addColorStop(0.22, 'rgba(255,214,170,0.12)');
+galaxyGlow.addColorStop(0, 'rgba(255,245,221,0.3)');
+galaxyGlow.addColorStop(0.22, 'rgba(255,214,170,0.07)');
 galaxyGlow.addColorStop(1, 'rgba(255,190,155,0)');
 galaxyGlowCtx.fillStyle = galaxyGlow;
 galaxyGlowCtx.fillRect(0, 0, 64, 64);
@@ -942,15 +943,15 @@ for (let g = 0; g < galaxySites.length; g++) {
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   galaxy.add(new THREE.Points(geo, new THREE.PointsMaterial({
-    vertexColors: true, size: 1.7, sizeAttenuation: false,
-    transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending,
+    vertexColors: true, size: 1.5, sizeAttenuation: false,
+    transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending,
     depthWrite: false, fog: false,
   })));
   const nucleus = new THREE.Sprite(new THREE.SpriteMaterial({
     map: galaxyGlowTexture, transparent: true, blending: THREE.AdditiveBlending,
     depthWrite: false, fog: false,
   }));
-  nucleus.scale.set(3.6, 3.6, 1);
+  nucleus.scale.set(3.3, 3.3, 1);
   galaxy.add(nucleus);
   galaxy.rotation.z = g * 0.9;
   galaxy.rotation.x = 0.15 + (g % 3) * 0.22;
@@ -958,11 +959,11 @@ for (let g = 0; g < galaxySites.length; g++) {
   galaxyGroups.push(galaxy);
 }
 function placeGalaxies() {
-  const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 139;
+  const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.position.z + galaxyDepth);
   galaxyGroups.forEach((galaxy, i) => galaxy.position.set(
     galaxySites[i][0] * halfHeight * camera.aspect,
     galaxySites[i][1] * halfHeight,
-    -130
+    -galaxyDepth
   ));
 }
 placeGalaxies();
